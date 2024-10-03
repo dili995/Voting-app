@@ -7,8 +7,8 @@ pipeline {
 
     environment {
         GO111MODULE = 'on'
-        DOCKER_IMAGE = "lukmanadeokun31/postgres:${env.BUILD_NUMBER}"
-        KUBECONFIG = credentials('kubeconfig-kind') 
+        DOCKER_IMAGE = "lukmanadeokun31/postgres"
+        //KUBECONFIG = credentials('kubeconfig-kind')
     }
 
     stages {
