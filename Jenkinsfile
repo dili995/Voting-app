@@ -15,7 +15,7 @@ pipeline {
         stage('Checkout postgres Code') {
             steps {
                // Clone  repository without specifying a branch or path
-              git branch: 'postgres', credentialsId: 'gtihub_token', url: 'git@github.com:AdekunleDally/voting-app.git'
+              git branch: 'postgres', credentialsId: 'my-github-credentials', url: 'git@github.com:AdekunleDally/voting-app.git'
             }
         }
 
