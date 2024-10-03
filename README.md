@@ -181,13 +181,15 @@ kind create cluster --name myvotingapp-microservice --config kind-config.yaml
 
 * Load the 5 images into the KIND cluster using the command below
 ``` bash
-  * kind load docker-image redis:latest --name myvotingapp-microservice
-  * kind load docker-image voting-service:latest --name myvotingapp-microservice
+  * kind load docker-image redis:latest --name votingapp-microservice
 
-  * kind load docker-image lukmanadeokun31/postgres:2 --name myvotingapp-microservice
-  * kind load docker-image results-service:latest --name myvotingapp-microservice
+  * kind load docker-image voting-service:latest --name votingapp-microservice
 
-  * kind load docker-image worker-service:latest --name myvotingapp-microservice
+  * kind load docker-image postgres:latest --name votingapp-microservice
+
+  * kind load docker-image results-service:latest --name votingapp-microservice
+
+  * kind load docker-image worker-service:latest --name votingapp-microservice
 ```
 
 * Deployed the redis pod,redis service, voting-app pod,voting-app service, postgres pod, postgres service,results pod, results service, worker pod, worker service 
