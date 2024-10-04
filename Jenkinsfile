@@ -1,59 +1,40 @@
-pipeline {
+pipeline { 
     agent any
-    
-    environment {
-        DOCKER_HUB_CREDENTIALS = credentials('docker-credentials')
-      //  GITHUB_TOKEN = credentials('Github_token')
-        KUBECONFIG_FILE = credentials('kubeconfig-kind') // Kubeconfig credentials for Kubernetes
-        IMAGE_NAME = "redis" // Define the image name as a variable for reusability
-        IMAGE_TAG = "latest" // You can change the tag dynamically or use 'latest'
-        DOCKER_TAG = "lukmanadeokun31/redis"
+
+    tools {
+        go 'go-1.20'
     }
-    
+
+    environment {
+        GO111MODULE = 'on'
+    }
+
     stages {
-        // stage('Checkout Redis Code') {
-        //     steps {
-        //           git credentialsId: 'my-github-credentials', url: 'git@github.com:AdekunleDally/voting-app.git', branch: 'redis'
-        //     }
-        // }
-        
-        stage('Build the Redis Image') {
+        stage('Checkout Code') {
             steps {
-                dir('redis') {
-                    script {
-                        // Build the Redis Docker image without tagging yet
-                        bat "docker build -t ${IMAGE_NAME} ."
-                    }
-                }
+               // Clone the repository without specifying a branch or path
+               git branch: 'redis', credentialsId: 'my-github-credentials', url: 'https://github.com/AdekunleDally/voting-app.git'
             }
         }
-        
-        stage('Tag and Push the Redis Image') {
+
+        stage('Build redis Image') {
             steps {
-                script {
-                    withDockerRegistry([credentialsId: 'docker-credentials', url: 'https://registry.hub.docker.com']) {
-                        // Tagging the built image with the desired tag and pushing it to Docker Hub
-                        bat "docker tag ${IMAGE_NAME} ${DOCKER_TAG}:${IMAGE_TAG}"
-                        bat "docker push ${DOCKER_TAG}:${IMAGE_TAG}"
+                dir('redis'){
+                    script {
+                        dockerImage = docker.build("lukmanadeokun31/redis")
                     }
                 }
             }
         }
 
-        // stage('Deploy Redis to Kubernetes with Helm') {
-        //     steps {
-        //         script {
-        //             withCredentials([file(credentialsId: 'kubeconfig-kind', variable: 'KUBECONFIG_PATH')]) {
-        //                 // Using the KUBECONFIG_PATH environment variable to deploy via Helm
-        //                 bat """
-        //                     helm upgrade --install redis ./redis/redis-chart \
-        //                     --set image.repository=${IMAGE_NAME} \
-        //                     --set image.tag=${IMAGE_TAG} \
-        //                     --kubeconfig %KUBECONFIG_PATH%
-        //                 """
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Push Redis Image') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-credentials') {
+                        dockerImage.push('latest')
+                    }
+                }
+            }
+        }
     }
 }
