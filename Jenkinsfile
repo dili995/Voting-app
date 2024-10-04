@@ -13,7 +13,7 @@ pipeline {
     stages {
         stage('Checkout Redis Code') {
             steps {
-                git credentialsId: 'Github_token', url: 'https://github.com/AdekunleDally/voting-app.git', branch: 'redis'
+                  git credentialsId: 'my-github-credentials', url: 'git@github.com:AdekunleDally/voting-app.git', branch: 'redis'
             }
         }
         
