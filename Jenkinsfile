@@ -3,16 +3,17 @@ pipeline {
     
     environment {
         DOCKER_HUB_CREDENTIALS = credentials('docker-credentials')
-        GITHUB_TOKEN = credentials('Github_token')
+      //  GITHUB_TOKEN = credentials('Github_token')
         KUBECONFIG_FILE = credentials('kubeconfig-kind') // Kubeconfig credentials for Kubernetes
-        IMAGE_NAME = "lukmanadeokun31/redis" // Define the image name as a variable for reusability
+        IMAGE_NAME = "redis" // Define the image name as a variable for reusability
         IMAGE_TAG = "latest" // You can change the tag dynamically or use 'latest'
+        DOCKER_TAG = "lukmanadeokun31/redis"
     }
     
     stages {
         stage('Checkout Redis Code') {
             steps {
-                git url: "https://$GITHUB_TOKEN@github.com/AdekunleDally/voting-app.git", branch: 'redis'
+                git credentialsId: 'Github_token', url: 'https://github.com/AdekunleDally/voting-app.git', branch: 'redis'
             }
         }
         
@@ -32,8 +33,8 @@ pipeline {
                 script {
                     withDockerRegistry([credentialsId: 'docker-credentials', url: 'https://registry.hub.docker.com']) {
                         // Tagging the built image with the desired tag and pushing it to Docker Hub
-                        bat "docker tag ${IMAGE_NAME}:latest ${IMAGE_NAME}:${IMAGE_TAG}"
-                        bat "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                        bat "docker tag ${IMAGE_NAME} ${DOCKER_TAG}:${IMAGE_TAG}"
+                        bat "docker push ${DOCKER_TAG}:${IMAGE_TAG}"
                     }
                 }
             }
