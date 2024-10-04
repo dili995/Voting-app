@@ -11,11 +11,11 @@ pipeline {
     }
     
     stages {
-        stage('Checkout Redis Code') {
-            steps {
-                  git credentialsId: 'my-github-credentials', url: 'git@github.com:AdekunleDally/voting-app.git', branch: 'redis'
-            }
-        }
+        // stage('Checkout Redis Code') {
+        //     steps {
+        //           git credentialsId: 'my-github-credentials', url: 'git@github.com:AdekunleDally/voting-app.git', branch: 'redis'
+        //     }
+        // }
         
         stage('Build the Redis Image') {
             steps {
