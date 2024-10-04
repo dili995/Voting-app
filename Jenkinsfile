@@ -10,10 +10,11 @@ pipeline {
     }
 
     stages {
-        stage('Checkout Code') {
+        stage('Checkout Redis Code') {
             steps {
                // Clone the repository without specifying a branch or path
-               git branch: 'redis', credentialsId: 'my-github-credentials', url: 'https://github.com/AdekunleDally/voting-app.git'
+               git branch: 'redis', credentialsId: 'my-github-credentials', url: 'git@github.com:AdekunleDally/voting-app.git'
+
             }
         }
 
