@@ -7,15 +7,14 @@ pipeline {
 
     environment {
         GO111MODULE = 'on'
-        DOCKER_IMAGE = "lukmanadeokun31/postgres"
-        //KUBECONFIG = credentials('kubeconfig-kind')
     }
 
     stages {
         stage('Checkout postgres Code') {
             steps {
-               // Clone  repository without specifying a branch or path
-              git branch: 'postgres', credentialsId: 'my-github-credentials', url: 'git@github.com:AdekunleDally/voting-app.git'
+               // Clone the repository without specifying a branch or path
+               git branch: 'postgres', credentialsId: 'my-github-credentials', url: 'git@github.com:AdekunleDally/voting-app.git'
+
             }
         }
 
@@ -23,47 +22,21 @@ pipeline {
             steps {
                 dir('postgres'){
                     script {
-                        docker.build(DOCKER_IMAGE)                   
+                         bat 'docker build -t "postgres" .'                  
                     }
                 }
             }
         }
 
-        stage('Push the Postgres Image') {
+        stage('Push postgres Image') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-credentials') {
-                        docker.image("${DOCKER_IMAGE}").push()   // Push with build number tag
-                        //  docker.image("${DOCKER_IMAGE}").tag('latest')  // Tag as 'latest'
+                    withDockerRegistry([credentialsId: 'docker-credentials', url: 'https://registry.hub.docker.com']) {
+                        bat 'docker tag "postgres" "lukmanadeokun31/postgres:latest"'
+                        bat 'docker push "lukmanadeokun31/postgres:latest"'
                     }
                 }
             }
         }
-
-        // stage('Deploy postgres to Kubernetes with Helm') {
-        //     steps {
-        //         script {
-        //             sh """
-        //             helm upgrade --install postgres ./postgres/postgres-chart \
-        //                 --set image.repository=${DOCKER_IMAGE} \
-        //                 --namespace postgres \
-        //                 --kubeconfig $KUBECONFIG
-        //             """
-        //         }
-        //     }
-        // }
     }
-    // post {
-    //     failure {
-    //         script {
-    //             // Rollback logic for failed deployment
-    //             sh """
-    //             helm rollback postgres
-    //             """
-    //         }
-    //     }
-    //     always {
-    //         cleanWs() // Clean workspace after build
-    //     }
-    // }
 }
