@@ -20,9 +20,9 @@ pipeline {
 
         stage('Build redis Image') {
             steps {
-                dir('redis'){
+                dir('redis') {
                     script {
-                        dockerImage = docker.build("lukmanadeokun31/redis")
+                        bat 'docker build -t "lukmanadeokun31/redis" .'
                     }
                 }
             }
@@ -31,8 +31,9 @@ pipeline {
         stage('Push Redis Image') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-credentials') {
-                        dockerImage.push('latest')
+                    withDockerRegistry([credentialsId: 'docker-credentials', url: 'https://registry.hub.docker.com']) {
+                        bat 'docker tag "lukmanadeokun31/redis" "lukmanadeokun31/redis:latest"'
+                        bat 'docker push "lukmanadeokun31/redis:latest"'
                     }
                 }
             }
