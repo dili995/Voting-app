@@ -7,16 +7,16 @@ pipeline {
 
     environment {
         GO111MODULE = 'on'
-        DOCKER_IMAGE = "lukmanadeokun31/voting-service:${env.BUILD_NUMBER}"
+        DOCKER_IMAGE = "lukmanadeokun31/voting-service"
         KUBECONFIG = credentials('kubeconfig-kind') 
     }
 
     stages {
-        stage('Checkout the voting-service Code') {
+        stage('Checkout the voting-service Branch') {
             steps {
                // Corrected syntax for git
                //git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/AdekunleDally/voting-app.git', timeout:30
-               git branch: 'main', credentialsId: 'my-github-credentials', url: 'git@github.com:AdekunleDally/voting-app.git'
+               git branch: 'voting-service', credentialsId: 'my-github-credentials', url: 'git@github.com:AdekunleDally/voting-app.git'
 
             }
         }
@@ -24,7 +24,7 @@ pipeline {
         stage('Test') {
             steps {
                 dir('voting-service') {
-                    bat 'go test ./...' // Running Go tests in voting-service directory on Windows
+                    bat 'go test .' // Running Go tests in voting-service directory on Windows
                 }
             }
         }
@@ -42,9 +42,9 @@ pipeline {
         stage('Push the voting-service Docker Image to DockerHub') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-credentials') {
-                    docker.image("${DOCKER_IMAGE}:${env.BUILD_NUMBER}").push()   // Push with build number tag
-                    docker.image("${DOCKER_IMAGE}:latest").push() 
+                    withDockerRegistry([credentialsId: 'docker-credentials', url: 'https://registry.hub.docker.com']) {
+                        bat 'docker tag "voting-service" "lukmanadeokun31/voting-service:latest"'
+                        bat 'docker push "lukmanadeokun31/voting-service:latest"'
                     }
                 }
             }
