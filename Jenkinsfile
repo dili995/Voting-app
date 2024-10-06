@@ -30,18 +30,16 @@ pipeline {
         // }
 
         stage('Build the voting-service Docker Image') {
-            timeout(time: 10, unit: 'MINUTES') { // Adjust the time as needed
-                steps {
-                    dir('voting-service') {
-                        // Using Jenkins 'withCredentials' to handle the .env file securely
-                        withCredentials([file(credentialsId: 'voting-service-env', variable: 'ENV_FILE')]) {
+            steps {
+                dir('voting-service') {
+                    // Using Jenkins 'withCredentials' to handle the .env file securely
+                    withCredentials([file(credentialsId: 'voting-service-env', variable: 'ENV_FILE')]) {
 
-                        // Use 'bat' to run Windows commands instead of 'sh'
-                        bat 'copy %ENV_FILE% .env'  // Windows equivalent of 'cp' command
+                    // Use 'bat' to run Windows commands instead of 'sh'
+                    bat 'copy %ENV_FILE% .env'  // Windows equivalent of 'cp' command
 
-                        // Build the Docker image using the Windows-friendly command
-                        bat 'docker build -t voting-service .'
-                        }
+                    // Build the Docker image using the Windows-friendly command
+                    bat 'docker build -t voting-service .'
                     }
                 }
             }
