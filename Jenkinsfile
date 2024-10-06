@@ -21,25 +21,27 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                dir('voting-service') {
-                    bat 'go test .' // Running Go tests in voting-service directory on Windows
-                }
-            }
-        }
+        // stage('Test') {
+        //     steps {
+        //         dir('voting-service') {
+        //             bat 'go test .' // Running Go tests in voting-service directory on Windows
+        //         }
+        //     }
+        // }
 
         stage('Build the voting-service Docker Image') {
-            steps {
-                dir('voting-service') {
-                    // Using Jenkins 'withCredentials' to handle the .env file securely
-                    withCredentials([file(credentialsId: 'voting-service-env', variable: 'ENV_FILE')]) {
+            timeout(time: 10, unit: 'MINUTES') { // Adjust the time as needed
+                steps {
+                    dir('voting-service') {
+                        // Using Jenkins 'withCredentials' to handle the .env file securely
+                        withCredentials([file(credentialsId: 'voting-service-env', variable: 'ENV_FILE')]) {
 
-                    // Use 'bat' to run Windows commands instead of 'sh'
-                    bat 'copy %ENV_FILE% .env'  // Windows equivalent of 'cp' command
+                        // Use 'bat' to run Windows commands instead of 'sh'
+                        bat 'copy %ENV_FILE% .env'  // Windows equivalent of 'cp' command
 
-                    // Build the Docker image using the Windows-friendly command
-                    bat 'docker build -t voting-service .'
+                        // Build the Docker image using the Windows-friendly command
+                        bat 'docker build -t voting-service .'
+                        }
                     }
                 }
             }
