@@ -21,13 +21,13 @@ pipeline {
             }
         }
 
-        // stage('Test') {
-        //     steps {
-        //         dir('voting-service') {
-        //             bat 'go test .' // Running Go tests in voting-service directory on Windows
-        //         }
-        //     }
-        // }
+        stage('Test') {
+            steps {
+                dir('voting-service') {
+                    bat 'go test .' // Running Go tests in voting-service directory on Windows
+                }
+            }
+        }
 
         stage('Build the voting-service Docker Image') {
             steps {
