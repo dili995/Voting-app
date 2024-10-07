@@ -7,16 +7,16 @@ pipeline {
 
     environment {
         GO111MODULE = 'on'
-        DOCKER_IMAGE = "lukmanadeokun31/results-service:${env.BUILD_NUMBER}"
+        DOCKER_IMAGE = "lukmanadeokun31/results-service"
         KUBECONFIG = credentials('kubeconfig-kind') 
     }
 
     stages {
-        stage('Checkout the result-service Code') {
+        stage('Checkout the results-service Branch') {
             steps {
                // Corrected syntax for git
-              // git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/AdekunleDally/voting-app.git'
-                git branch: 'main', credentialsId: 'my-github-credentials', url: 'git@github.com:AdekunleDally/voting-app.git'
+               //git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/AdekunleDally/voting-app.git', timeout:30
+               git branch: 'results-service', credentialsId: 'my-github-credentials', url: 'git@github.com:AdekunleDally/voting-app.git'
 
             }
         }
@@ -24,27 +24,33 @@ pipeline {
         stage('Test') {
             steps {
                 dir('results-service') {
-                    bat 'go test ./...' // Running Go tests in voting-service directory on Windows
+                    bat 'go test .' // Running Go tests in results-service directory on Windows
                 }
             }
         }
 
-        stage('Build the result-service Docker Image') {
+        stage('Build the results-service Docker Image') {
             steps {
                 dir('results-service') {
-                    script {
-                        docker.build(DOCKER_IMAGE)                    
+                    // Using Jenkins 'withCredentials' to handle the .env file securely
+                    withCredentials([file(credentialsId: 'results-service-env', variable: 'ENV_FILE')]) {
+
+                    // Use 'bat' to run Windows commands instead of 'sh'
+                    bat 'copy %ENV_FILE% .env'  // Windows equivalent of 'cp' command
+
+                    // Build the Docker image using the Windows-friendly command
+                    bat 'docker build -t results-service .'
                     }
                 }
             }
         }
 
-        stage('Push the results-service Docker Image') {
+        stage('Push the results-service Docker Image to DockerHub') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-credentials') {
-                        docker.image("${DOCKER_IMAGE}:${env.BUILD_NUMBER}").push()   // Push with build number tag
-                        docker.image("${DOCKER_IMAGE}:latest").push() 
+                    withDockerRegistry([credentialsId: 'docker-credentials', url: 'https://registry.hub.docker.com']) {
+                        bat 'docker tag "results-service" "lukmanadeokun31/results-service:latest"'
+                        bat 'docker push "lukmanadeokun31/results-service:latest"'
                     }
                 }
             }
@@ -54,7 +60,7 @@ pipeline {
         //     steps {
         //         script {
         //             sh """
-        //             helm upgrade --install results ./results/results-chart \
+        //             helm upgrade --install results ./results-service/results-chart \
         //                 --set image.repository=${DOCKER_IMAGE} \
         //                 --namespace results \
         //                 --kubeconfig $KUBECONFIG
