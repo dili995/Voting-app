@@ -7,16 +7,16 @@ pipeline {
 
     environment {
         GO111MODULE = 'on'
-        DOCKER_IMAGE = "lukmanadeokun31/worker-service:${env.BUILD_NUMBER}"
+        DOCKER_IMAGE = "lukmanadeokun31/voting-service"
         KUBECONFIG = credentials('kubeconfig-kind') 
     }
 
     stages {
-        stage('Checkout Code') {
+        stage('Checkout the worker-service Branch') {
             steps {
                // Corrected syntax for git
-            //   git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/AdekunleDally/voting-app.git'
-                 git branch: 'main', credentialsId: 'my-github-credentials', url: 'git@github.com:AdekunleDally/voting-app.git'
+               //git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/AdekunleDally/voting-app.git', timeout:30
+               git branch: 'worker-service', credentialsId: 'my-github-credentials', url: 'git@github.com:AdekunleDally/voting-app.git'
 
             }
         }
@@ -24,39 +24,45 @@ pipeline {
         stage('Test') {
             steps {
                 dir('worker-service') {
-                    bat 'go test ./...' // Running Go tests in voting-service directory on Windows
+                    bat 'go test .' // Running Go tests in worker-service directory on Windows
                 }
             }
         }
 
-        stage('Build the Docker Image') {
+        stage('Build the worker-service Docker Image') {
             steps {
                 dir('worker-service') {
-                    script {
-                        docker.build(DOCKER_IMAGE)
+                    // Using Jenkins 'withCredentials' to handle the .env file securely
+                    withCredentials([file(credentialsId: 'worker-service-env', variable: 'ENV_FILE')]) {
+
+                    // Use 'bat' to run Windows commands instead of 'sh'
+                    bat 'copy %ENV_FILE% .env'  // Windows equivalent of 'cp' command
+
+                    // Build the Docker image using the Windows-friendly command
+                    bat 'docker build -t worker-service .'
                     }
                 }
             }
         }
 
-        stage('Push the Docker Image') {
+        stage('Push the worker-service Docker Image to DockerHub') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-credentials') {
-                    docker.image("${DOCKER_IMAGE}:${env.BUILD_NUMBER}").push()   // Push with build number tag
-                    docker.image("${DOCKER_IMAGE}:latest").push()               // Push with 'latest' tag
+                    withDockerRegistry([credentialsId: 'docker-credentials', url: 'https://registry.hub.docker.com']) {
+                        bat 'docker tag "worker-service" "lukmanadeokun31/worker-service:latest"'
+                        bat 'docker push "lukmanadeokun31/worker-service:latest"'
                     }
                 }
             }
         }
 
-        // stage('Deploy the worker-service Kubernetes with Helm') {
+        // stage('Deploy worker-service to Kubernetes with Helm') {
         //     steps {
         //         script {
         //             sh """
-        //             helm upgrade --install worker ./worker-service/worker-chart \
+        //             helm upgrade --install voting ./voting-service/voting-chart \
         //                 --set image.repository=${DOCKER_IMAGE} \
-        //                 --namespace worker \
+        //                 --namespace voting \
         //                 --kubeconfig $KUBECONFIG
         //             """
         //         }
@@ -68,7 +74,7 @@ pipeline {
     //         script {
     //             // Rollback logic for failed deployment
     //             sh """
-    //             helm rollback voting-app
+    //             helm rollback ${env.SERVICE_NAME}
     //             """
     //         }
     //     }
