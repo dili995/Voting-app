@@ -8,7 +8,7 @@ pipeline {
     environment {
         GO111MODULE = 'on'
         KUBECONFIG = credentials('kubeconfig-kind') // Using kubeconfig
-        DOCKER_IMAGE = lukmanadeokun31/redis:latest
+        DOCKER_IMAGE = "lukmanadeokun31/redis:latest"
     }
 
     stages {
