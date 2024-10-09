@@ -36,5 +36,23 @@ pipeline {
                 }
             }
         }
+
+        stage('Load image to KIND Cluster') {
+            steps {
+                bat 'kind load docker-image lukmanadeokun31/redis:latest --name votingapp-microservice'
+            }
+        }
+
+        stage('Deploy with Helm') {
+            steps {
+                bat 'helm upgrade --install redis ./redis-chart -f ./redis-chart/values.yaml --set image.tag="latest" '
+            }
+        }
+
+        stage('Test Deployment') {
+            steps {
+                bat 'kubectl get pods -n redis-namespace'
+            }
+        }
     }
 }
