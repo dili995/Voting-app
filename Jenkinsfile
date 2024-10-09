@@ -55,7 +55,24 @@ pipeline {
                 }
             }
         }
+        
+        stage('Load image to KIND Cluster') {
+            steps {
+                bat 'kind load docker-image lukmanadeokun31/results-service:latest --name votingapp-microservice'
+            }
+        }
 
+        stage('Deploy with Helm') {
+            steps {
+                bat 'helm upgrade --install results ./results-service/results-chart -f ./results-service/results-chart/values.yaml --set image.repository=${DOCKER_IMAGE} --set image.tag="latest"'
+            }
+        }
+
+        stage('Test Deployment') {
+            steps {
+                bat 'kubectl get pods -n results-namespace'
+            }
+        }
         // stage('Deploy results-service to Kubernetes with Helm') {
         //     steps {
         //         script {
