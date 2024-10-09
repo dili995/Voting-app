@@ -167,7 +167,7 @@ To containerize the application, Dockerfiles are used for each service, and a `d
 
 
 ### Microservice in Docker Desktop after running the cmd  `docker-compose up -d` in the terminal
-![Docker-Compose reslts](./images/docker-desktop.png)
+![Docker-Compose results](./images/docker-desktop.png)
 
 ## Container Orchestration using Kubernetes
 With each service dockerised, the next step is to load into a kubernetes cluster.
