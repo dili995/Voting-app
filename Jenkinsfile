@@ -38,5 +38,23 @@ pipeline {
                 }
             }
         }
+
+        stage('Load image to KIND Cluster') {
+            steps {
+                bat 'kind load docker-image lukmanadeokun31/postgres:latest --name votingapp-microservice'
+            }
+        }
+
+        stage('Deploy with Helm') {
+            steps {
+                bat 'helm upgrade --install postgres ./postgres/postgres-chart -f ./postgres/postgres-chart/values.yaml --set image.tag="latest" '
+            }
+        }
+
+        stage('Test Deployment') {
+            steps {
+                bat 'kubectl get pods -n postgres-namespace'
+            }
+        }
     }
 }
