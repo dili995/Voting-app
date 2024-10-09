@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         GO111MODULE = 'on'
-        DOCKER_IMAGE = "lukmanadeokun31/voting-service"
+        DOCKER_IMAGE = "lukmanadeokun31/worker-service"
         KUBECONFIG = credentials('kubeconfig-kind') 
     }
 
@@ -56,13 +56,31 @@ pipeline {
             }
         }
 
+        stage('Load image to KIND Cluster') {
+            steps {
+                bat 'kind load docker-image lukmanadeokun31/worker-service:latest --name votingapp-microservice'
+            }
+        }
+
+        stage('Deploy with Helm') {
+            steps {
+                bat "helm upgrade --install worker ./worker-service/worker-chart -f ./worker-service/worker-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\""
+            }
+        }
+
+        stage('Test Deployment') {
+            steps {
+                bat 'kubectl get pods -n worker-namespace'
+            }
+        }
+
         // stage('Deploy worker-service to Kubernetes with Helm') {
         //     steps {
         //         script {
         //             sh """
-        //             helm upgrade --install voting ./voting-service/voting-chart \
+        //             helm upgrade --install worker ./worker-service/worker-chart \
         //                 --set image.repository=${DOCKER_IMAGE} \
-        //                 --namespace voting \
+        //                 --namespace worker \
         //                 --kubeconfig $KUBECONFIG
         //             """
         //         }
