@@ -56,6 +56,24 @@ pipeline {
             }
         }
 
+        stage('Load image to KIND Cluster') {
+            steps {
+                bat 'kind load docker-image lukmanadeokun31/voting-service:latest --name votingapp-microservice'
+            }
+        }
+
+        stage('Deploy with Helm') {
+            steps {
+                bat 'helm upgrade --install voting ./voting-service/voting-chart -f ./voting-service/voting-chart/values.yaml --set image.tag="latest" '
+            }
+        }
+
+        stage('Test Deployment') {
+            steps {
+                bat 'kubectl get pods -n voting-namespace'
+            }
+        }
+
         // stage('Deploy voting-service to Kubernetes with Helm') {
         //     steps {
         //         script {
