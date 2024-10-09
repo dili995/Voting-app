@@ -64,7 +64,7 @@ pipeline {
 
         stage('Deploy with Helm') {
             steps {
-                bat 'helm upgrade --install results ./results-service/results-chart -f ./results-service/results-chart/values.yaml --set image.repository=${DOCKER_IMAGE} --set image.tag="latest"'
+                 bat "helm upgrade --install results ./results-service/results-chart -f ./results-service/results-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\""
             }
         }
 
