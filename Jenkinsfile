@@ -7,6 +7,8 @@ pipeline {
 
     environment {
         GO111MODULE = 'on'
+        DOCKER_IMAGE = "lukmanadeokun31/postgres:latest"
+        KUBECONFIG = credentials('kubeconfig-kind') 
     }
 
     stages {
@@ -47,8 +49,7 @@ pipeline {
 
         stage('Deploy with Helm') {
             steps {
-                bat 'helm upgrade --install postgres ./postgres/postgres-chart -f ./postgres/postgres-chart/values.yaml --set image.tag="latest" '
-            }
+                bat "helm upgrade --install postgres ./postgres/postgres-chart -f ./postgres/postgres-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\""            }
         }
 
         stage('Test Deployment') {
