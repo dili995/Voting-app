@@ -47,7 +47,7 @@ pipeline {
 
         stage('Deploy with Helm') {
             steps {
-                bat "helm upgrade --install redis ./redis-chart -f ./redis-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\""     
+                bat "helm upgrade --install redis ./redis-chart -f ./redis-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\" --insecure-skip-tls-verify"     
             }
         }
 
