@@ -64,7 +64,7 @@ pipeline {
 
         stage('Deploy with Helm') {
             steps {
-                bat "helm upgrade --install voting ./voting-service/voting-chart -f ./voting-service/voting-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\" --insecure-skip-tls-verify"
+                bat "helm upgrade --install voting ./voting-service/voting-chart -f ./voting-service/voting-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\""
             }
         }
 
