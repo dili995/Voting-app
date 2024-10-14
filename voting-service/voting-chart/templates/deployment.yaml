@@ -14,11 +14,11 @@ spec:
     spec:
       containers:
       - name: voting
-        image: {{ .Values.image.repository }} : {{ .Values.image.tag }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
         ports:
         - containerPort: 8083
         env:
         - name: RESULTS_SERVICE_URL
-          value: "http://voting-service:30005/results"
+          value: "http://results-service:30005/results"
         - name: REDIS_ADDR
           value: "redis:6379"
