@@ -4,8 +4,8 @@ metadata:
   name: {{ .Release.Name }}-deploy
   name: redis
 spec:
-  #replicas: {{ .Values.replicaCount }}
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
+  #replicas: 1
   selector:
     matchLabels:
       app: redis
