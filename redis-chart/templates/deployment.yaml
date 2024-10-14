@@ -2,8 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-deploy
+  name: redis
 spec:
-  replicas: {{ .Values.replicaCount }}
+  #replicas: {{ .Values.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
       app: redis
@@ -15,5 +17,6 @@ spec:
       containers:
       - name: redis
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        #image: lukmanadeokun31/redis:latest
         ports:
-        - containerPort: 6379
+          - containerPort: 6379
