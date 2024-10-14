@@ -44,7 +44,8 @@ securityContext: {}
 
 service:
   type: NodePort
-  port: 8085
+  port: 8085       # The port on the ClusterIP where the service will be accessible internally
+  nodePort: 30005  # The NodePort that exposes the service externally on the node
 
 ingress:
   enabled: false
