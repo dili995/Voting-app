@@ -14,6 +14,11 @@ hpa:
   minReplicas: 1
   maxReplicas: 10
 
+service:
+  type: NodePort
+  port: 8083       # The port on the ClusterIP where the service will be accessible internally
+  nodePort: 30004  # The NodePort that exposes the service externally on the node
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
