@@ -4,7 +4,8 @@ metadata:
   #name: {{ .Release.Name }}-deploy
   name: voting
 spec:
-  replicas: {{ .Values.replicaCount }}
+  # replicas: {{ .Values.replicaCount }}
+  replicas: 1
   selector:  
     matchLabels:
       app: voting
@@ -15,11 +16,12 @@ spec:
     spec:
       containers:
       - name: voting
-        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        # image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        image: "lukmanadeokun31/voting-service:latest"
         ports:
-        - containerPort: 8083
+          - containerPort: 8083
         env:
-        - name: RESULTS_SERVICE_URL
-          value: "http://results-service:30005/results"
-        - name: REDIS_ADDR
-          value: "redis:6379"
+          - name: RESULTS_SERVICE_URL
+            value: "http://results-service:30005/results"
+          - name: REDIS_ADDR
+            value: "redis:6379"

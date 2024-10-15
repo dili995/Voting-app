@@ -80,14 +80,17 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-livenessProbe:
-  httpGet:
-    path: /
-    port: 8083
-readinessProbe:
-  httpGet:
-    path: /
-    port: 8083
+livenessProbe: {}
+
+readinessProbe: {}
+# livenessProbe:
+#   httpGet:
+#     path: /
+#     port: 8083
+# readinessProbe:
+#   httpGet:
+#     path: /  
+#     port: 8083
 
 autoscaling:
   enabled: true
