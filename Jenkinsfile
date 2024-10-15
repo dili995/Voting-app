@@ -22,10 +22,8 @@ pipeline {
 
         stage('Build the Postgres Image') {
             steps {
-                dir('postgres'){
-                    script {
-                         bat 'docker build -t "postgres" .'                  
-                    }
+                script {
+                    bat 'docker build -t "postgres" .'                  
                 }
             }
         }
@@ -49,7 +47,7 @@ pipeline {
 
         stage('Deploy with Helm') {
             steps {
-                bat "helm upgrade --install postgres ./postgres/postgres-chart -f ./postgres/postgres-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\""           
+                bat "helm upgrade --install postgres ./postgres-chart -f ./postgres-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\""           
             }
         }
 
