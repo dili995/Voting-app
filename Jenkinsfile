@@ -23,9 +23,8 @@ pipeline {
 
         stage('Test') {
             steps {
-                dir('worker-service') {
-                    bat 'go test .' // Running Go tests in worker-service directory on Windows
-                }
+                bat 'go test .' // Running Go tests in worker-service directory on Windows
+                
             }
         }
 
