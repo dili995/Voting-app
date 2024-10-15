@@ -30,18 +30,16 @@ pipeline {
 
         stage('Build the worker-service Docker Image') {
             steps {
-                dir('worker-service') {
-                    // Using Jenkins 'withCredentials' to handle the .env file securely
-                    withCredentials([file(credentialsId: 'worker-service-env', variable: 'ENV_FILE')]) {
+                // Using Jenkins 'withCredentials' to handle the .env file securely
+                withCredentials([file(credentialsId: 'worker-service-env', variable: 'ENV_FILE')]) {
 
-                    // Use 'bat' to run Windows commands instead of 'sh'
-                    bat 'copy %ENV_FILE% .env'  // Windows equivalent of 'cp' command
+                // Use 'bat' to run Windows commands instead of 'sh'
+                bat 'copy %ENV_FILE% .env'  // Windows equivalent of 'cp' command
 
-                    // Build the Docker image using the Windows-friendly command
-                    bat 'docker build -t worker-service .'
-                    }
+                // Build the Docker image using the Windows-friendly command
+                bat 'docker build -t worker-service .'
                 }
-            }
+             }
         }
 
         stage('Push the worker-service Docker Image to DockerHub') {
