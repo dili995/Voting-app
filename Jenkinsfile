@@ -63,7 +63,7 @@ pipeline {
 
         stage('Deploy with Helm') {
             steps {
-                bat "helm upgrade --install voting ./voting-service/voting-chart -f ./voting-service/voting-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\""
+                bat "helm upgrade --install voting ./voting-chart -f ./voting-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\""
             }
         }
 
@@ -77,7 +77,7 @@ pipeline {
         //     steps {
         //         script {
         //             sh """
-        //             helm upgrade --install voting ./voting-service/voting-chart \
+        //             helm upgrade --install voting ./voting-chart \
         //                 --set image.repository=${DOCKER_IMAGE} \
         //                 --namespace voting \
         //                 --kubeconfig $KUBECONFIG
