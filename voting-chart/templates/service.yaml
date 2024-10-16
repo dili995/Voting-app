@@ -11,11 +11,10 @@ spec:
   selector:
     app: voting
   ports:
-    - name: web
-      port: 8083  
-      #protocol: TCP
+    - port: 8083  
       targetPort: 8083
       nodePort: 30004
+      #protocol: TCP
   
 
 # ---
