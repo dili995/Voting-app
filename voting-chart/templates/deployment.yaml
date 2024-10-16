@@ -24,4 +24,4 @@ spec:
           - name: RESULTS_SERVICE_URL
             value: "http://results-service:30005/results"
           - name: REDIS_ADDR
-            value: "redis-service:6379"
+            value: "redis-fdd6fcbdd-9lnpz:6379"
