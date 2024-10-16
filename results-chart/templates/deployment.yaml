@@ -19,7 +19,7 @@ spec:
           - containerPort: 8085
         env:
           - name: VOTING_SERVICE_URL
-            value: "http://voting-service:30004"
+            value: "http://localhost:30004"
           - name: POSTGRES_USER
             value: "postgres"
           - name: POSTGRES_PASSWORD
