@@ -70,7 +70,7 @@ pipeline {
 
         stage('Test Deployment') {
             steps {
-                bat 'kubectl get pods -n results-namespace'
+                bat 'kubectl get pods'
             }
         }
         // stage('Deploy results-service to Kubernetes with Helm') {
