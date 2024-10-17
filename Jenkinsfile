@@ -69,7 +69,7 @@ pipeline {
 
         stage('Test Deployment') {
             steps {
-                bat 'kubectl get pods -n voting-namespace'
+                bat 'kubectl get pods'
             }
         }
 
