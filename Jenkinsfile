@@ -53,7 +53,7 @@ pipeline {
 
         stage('Test Deployment') {
             steps {
-                bat 'kubectl get pods -n redis-namespace'
+                bat 'kubectl get pods'
             }
         }
     }
