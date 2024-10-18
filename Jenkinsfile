@@ -31,17 +31,16 @@ pipeline {
 
         stage('Build the results-service Docker Image') {
             steps {
-                dir('results-service') {
-                    // Using Jenkins 'withCredentials' to handle the .env file securely
-                    withCredentials([file(credentialsId: 'results-service-env', variable: 'ENV_FILE')]) {
+               
+                // Using Jenkins 'withCredentials' to handle the .env file securely
+                withCredentials([file(credentialsId: 'results-service-env', variable: 'ENV_FILE')]) {
 
-                    // Use 'bat' to run Windows commands instead of 'sh'
-                    bat 'copy %ENV_FILE% .env'  // Windows equivalent of 'cp' command
+                // Use 'bat' to run Windows commands instead of 'sh'
+                bat 'copy %ENV_FILE% .env'  // Windows equivalent of 'cp' command
 
-                    // Build the Docker image using the Windows-friendly command
-                    bat 'docker build -t results-service .'
-                    }
-                }
+                // Build the Docker image using the Windows-friendly command
+                bat 'docker build -t results-service .'
+                }  
             }
         }
 
