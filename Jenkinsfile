@@ -23,9 +23,9 @@ pipeline {
 
         stage('Test') {
             steps {
-                dir('results-service') {
-                    bat 'go test .' // Running Go tests in results-service directory on Windows
-                }
+                
+                bat 'go test .' // Running Go tests in results-service directory on Windows
+                
             }
         }
 
