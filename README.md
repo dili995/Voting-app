@@ -1,4 +1,3 @@
-Here’s a sample `README.md` file for the Redis component of your voting app microservice:
 
 ```md
 # Redis Component - Voting App Microservice
@@ -141,10 +140,9 @@ Ensure that Prometheus is installed and set up to scrape Redis metrics. You can 
 ```
 
 Grafana dashboards can be set up to visualize the metrics.
+  
 
-## License
 
-This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
 ```
 
 ### Explanation:
