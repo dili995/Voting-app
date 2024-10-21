@@ -120,10 +120,7 @@ helm install redis ./redis-chart
 
 This will deploy  Redis, into the Kubernetes KIND cluster.
 
-## Automated deployment of redis using Jenkins pipeline
-* Create a pipeline in the root directory of the redis branch
-* Include the relevant stages of deployment in the jenkinsfile
-* Build the Jenkins pipeline 
+
 
 
 ![redis-service-pipeline](./images/redis-service-pipeline.png)
