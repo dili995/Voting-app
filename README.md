@@ -22,7 +22,7 @@
 - [Notes](#notes)
 
 ## Overview
-This repository contains a microservice-based voting application written in Go (Golang). The application allows users to vote for either cats or dogs. It then processes these votes in real-time, and displays the results. 
+This repository contains a microservice-based voting application written in Go (Golang). Each branch of this repository represnts a component of the application.The application allows users to vote for either cats or dogs. It then processes these votes in real-time, and displays the results. 
 
 The deployment of the application uses CI/CD with Jenkins, container orchestration with Kubernetes, monitoring with Prometheus and Grafana, and logging with the ELK stack (Elasticsearch, Logstash, and Kibana).
 
@@ -46,6 +46,10 @@ Ensure the following dependencies are installed:
 - **Docker** for containerization
 - **Jenkins** for CI/CD pipeline automation
 - **Kubernetes** for container orchestration
+- **DockerDesktop** for local containerisation
+- **Kubernetes in Docker(KIND)** for kubernetes clusters management
+
+
 - **Prometheus & Grafana** for monitoring and alerting
 - **ELK Stack** (Elasticsearch, Logstash, Kibana) for logging
 
@@ -178,10 +182,10 @@ Kubernetes in Docker(KIND) was used to achieve this
 ``` bash 
 kind create cluster --name myvotingapp-microservice --config kind-config.yaml  
 ```
-
+ 
 * Load the 5 images into the KIND cluster using the command below
 ``` bash
-  * kind load docker-image redis:latest --name votingapp-microservice
+  * kind load docker-image redis:latest --name    votingapp-microservice
 
   * kind load docker-image voting-service:latest --name votingapp-microservice
 
@@ -213,8 +217,35 @@ kind create cluster --name myvotingapp-microservice --config kind-config.yaml
 * Ran the url below in  a browser 
 http://127.0.0.1:30004/
 
+## Automated Container Orchestration in KIND using Jenkins
+
+The CI/CD pipeline automates the deployment of each service from its respective branch into the KIND cluster. Each branch represents one of the microservices, and Jenkins automates:
+
+* Checking out code from GitHub.
+* Running tests.
+* Building Docker images.
+* Pushing images to Docker Hub.
+* Deploying to the KIND cluster.
+* Steps to Automate with Jenkins:
+
+First , the KIND cluster automatically generates certificates and keys for authentication between the client (e.g., kubectl) and the cluster's API server
+
+* Copy the values of the certificate-authority-data,client-certificate-data and client-key-data from the KIND cluster  and encode into base64
+
+* Update the kubeconfig.yaml file with these values
+
+* Upload the kubeconfig.yaml file as a credential file to jenkins
+
+* Set up SSH access between Jenkins and your GitHub repository.
+* Add Docker Hub credentials to Jenkins.
+* Configure pipelines for each service (voting-service, worker-service, results-service, Redis, PostgreSQL) by creating a jenkinsfile in the root directory of each branch.
+* Automate deployment for pipeline using kubectl and Helm.
+
+![votingapp-microservice.png](./images/votingapp-microservice.png)
+
+
 ## Design Choices
-- **Microservice Architecture:** The system is divided into loosely coupled services (voting, worker, and results) for scalability and independent deployment.
+- **Microservice Architecture:** The application is divided into loosely coupled services (voting, worker,results, redis and postgres) for scalability and independent deployment.
 - **Autoscaling:** Kubernetes Horizontal Pod Autoscaler ensures efficient handling of increased traffic based on CPU usage.
 - **Monitoring & Logging:** Prometheus, Grafana, and the ELK stack provide a comprehensive solution for monitoring and logging.
 
