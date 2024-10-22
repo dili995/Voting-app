@@ -149,7 +149,7 @@ Logs are available via `kubectl logs`:
 kubectl logs <worker-service-pod-name>
 ```
 
-## Helm Chart Deployment (Optional)
+## Helm Chart Deployment
 
 You can automate the deployment using Helm charts. Customize a `values.yaml` file for the worker-service and use the following commands:
 
