@@ -94,7 +94,7 @@ kubectl get svc results-service
 http://localhost:30005/results
 ```
 
-## Automated Deployment of results-service
+## Automated Deployment of Results-Service
 * Create Jenkinsfile in the root directory of the results-service branch
 * Include the neccessary stages in the Jenkinsfile needed for the automated deployment
 * Build the Jenkins pipeline
