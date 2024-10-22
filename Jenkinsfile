@@ -9,6 +9,7 @@ pipeline {
         GO111MODULE = 'on'
         DOCKER_IMAGE = "lukmanadeokun31/voting-service"
         KUBECONFIG = credentials('kubeconfig-kind') 
+        RELEASE_NAME = "voting" // Helm release name
     }
 
     stages {
@@ -63,7 +64,7 @@ pipeline {
 
         stage('Deploy with Helm') {
             steps {
-                bat "helm upgrade --install voting ./voting-chart -f ./voting-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\""
+                bat "helm upgrade --install ${RELEASE_NAME} ./voting-chart -f ./voting-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\""
             }
         }
 
@@ -72,31 +73,19 @@ pipeline {
                 bat 'kubectl get pods'
             }
         }
-
-        // stage('Deploy voting-service to Kubernetes with Helm') {
-        //     steps {
-        //         script {
-        //             sh """
-        //             helm upgrade --install voting ./voting-chart \
-        //                 --set image.repository=${DOCKER_IMAGE} \
-        //                 --namespace voting \
-        //                 --kubeconfig $KUBECONFIG
-        //             """
-        //         }
-        //     }
-        // }
     }
-    // post {
-    //     failure {
-    //         script {
-    //             // Rollback logic for failed deployment
-    //             sh """
-    //             helm rollback ${env.SERVICE_NAME}
-    //             """
-    //         }
-    //     }
-    //     always {
-    //         cleanWs() // Clean workspace after build
-    //     }
-    // }
+    
+    post {
+        failure {
+            script {
+                // Rollback logic for failed deployment
+                bat "helm rollback ${RELEASE_NAME}"
+              
+             
+            }
+        }
+        always {
+            cleanWs() // Clean workspace after build
+        }
+    }
 }
