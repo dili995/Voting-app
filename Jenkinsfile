@@ -78,14 +78,22 @@ pipeline {
     post {
         failure {
             script {
-                // Rollback logic for failed deployment
-                bat "helm rollback ${RELEASE_NAME}"
-              
-             
+                try {
+                    // Attempt to rollback the Helm release
+                    echo "Deployment failed. Attempting to rollback the release..."
+                    def rollbackStatus = bat(script: "helm rollback ${RELEASE_NAME}", returnStatus: true)
+
+                    // Check if rollback was successful based on the return status
+                    if (rollbackStatus == 0) {
+                        echo "Rollback completed successfully."
+                    } else {
+                        error("Helm rollback failed with exit code ${rollbackStatus}.")
+                    }
+                } catch (Exception e) {
+                    // Catch any unexpected errors
+                    error("An error occurred during the rollback process: ${e.message}")
+                }
             }
-        }
-        always {
-            cleanWs() // Clean workspace after build
         }
     }
 }
