@@ -9,6 +9,7 @@ pipeline {
         GO111MODULE = 'on'
         DOCKER_IMAGE = "lukmanadeokun31/results-service"
         KUBECONFIG = credentials('kubeconfig-kind') 
+        RELEASE_NAME = "results"
     }
 
     stages {
@@ -63,7 +64,7 @@ pipeline {
 
         stage('Deploy with Helm') {
             steps {
-                 bat "helm upgrade --install results ./results-chart -f ./results-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\""
+                 bat "helm upgrade --install ${RELEASE_NAME} ./results-chart -f ./results-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\""
             }
         }
 
@@ -72,30 +73,19 @@ pipeline {
                 bat 'kubectl get pods'
             }
         }
-        // stage('Deploy results-service to Kubernetes with Helm') {
-        //     steps {
-        //         script {
-        //             sh """
-        //             helm upgrade --install results ./results-service/results-chart \
-        //                 --set image.repository=${DOCKER_IMAGE} \
-        //                 --namespace results \
-        //                 --kubeconfig $KUBECONFIG
-        //             """
-        //         }
-        //     }
-        // }
     }
-    // post {
-    //     failure {
-    //         script {
-    //             // Rollback logic for failed deployment
-    //             sh """
-    //             helm rollback ${env.SERVICE_NAME}
-    //             """
-    //         }
-    //     }
-    //     always {
-    //         cleanWs() // Clean workspace after build
-    //     }
-    // }
+
+    post {
+        failure {
+            script {
+                // Rollback logic for failed deployment
+                bat "helm rollback ${RELEASE_NAME}"
+                
+             
+            }
+        }
+        always {
+            cleanWs() // Clean workspace after build
+        }
+    }
 }
