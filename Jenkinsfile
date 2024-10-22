@@ -54,8 +54,8 @@ pipeline {
 
         stage('Test Deployment') {
             steps {
-                // bat 'kubectl get pods'
-                bat 'kubectl get non-existent-resource'
+                 bat 'kubectl get pods --kubeconfig=${KUBECONFIG}'
+                //bat 'kubectl get non-existent-resource'
             }
         }
     }
