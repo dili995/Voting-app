@@ -8,7 +8,8 @@ pipeline {
     environment {
         GO111MODULE = 'on'
         DOCKER_IMAGE = "lukmanadeokun31/worker-service"
-        KUBECONFIG = credentials('kubeconfig-kind') 
+        KUBECONFIG = credentials('kubeconfig-kind')
+        RELEASE_NAME = "worker" 
     }
 
     stages {
@@ -61,7 +62,7 @@ pipeline {
 
         stage('Deploy with Helm') {
             steps {
-                bat "helm upgrade --install worker ./worker-chart -f ./worker-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\""
+                bat "helm upgrade --install ${RELEASE_NAME} ./worker-chart -f ./worker-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\""
             }
         }
 
@@ -71,30 +72,16 @@ pipeline {
             }
         }
 
-        // stage('Deploy worker-service to Kubernetes with Helm') {
-        //     steps {
-        //         script {
-        //             sh """
-        //             helm upgrade --install worker ./worker-chart \
-        //                 --set image.repository=${DOCKER_IMAGE} \
-        //                 --namespace worker \
-        //                 --kubeconfig $KUBECONFIG
-        //             """
-        //         }
-        //     }
-        // }
     }
-    // post {
-    //     failure {
-    //         script {
-    //             // Rollback logic for failed deployment
-    //             sh """
-    //             helm rollback ${env.SERVICE_NAME}
-    //             """
-    //         }
-    //     }
-    //     always {
-    //         cleanWs() // Clean workspace after build
-    //     }
-    // }
+    post {
+        failure {
+            script {
+                // Rollback logic for failed deployment
+                bat "helm rollback ${RELEASE_NAME}"
+            }
+        }
+        always {
+            cleanWs() // Clean workspace after build
+        }
+    }
 }
