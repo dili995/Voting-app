@@ -154,7 +154,7 @@ kubectl logs <worker-service-pod-name>
 You can automate the deployment using Helm charts. Customize a `values.yaml` file for the worker-service and use the following commands:
 
 ```bash
-helm install worker ./worker-charts -f ./worker-chart/values.yaml
+helm install worker ./worker-chart -f ./worker-chart/values.yaml
 ```
 
 ## Conclusion
