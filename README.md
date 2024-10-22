@@ -1,6 +1,6 @@
 # Results-Service for VotingApp Microservice
 
-This repository contains the **results-service** component of the VotingApp microservice. The results-service displays the current vote counts for the cat vs. dog voting competition, by retrieving the votes from a PostgreSQL database and rendering the results on an HTML page.
+This branch contains the **results-service** component of the VotingApp microservice. The results-service displays the current vote counts for the cat vs. dog voting competition, by retrieving the votes from a PostgreSQL database and rendering the results on an HTML page.
 
 ## Overview
 
