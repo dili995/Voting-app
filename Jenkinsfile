@@ -60,15 +60,15 @@ pipeline {
         }
     }
 
-    // post {
-    //     failure {
-    //         script {
-    //             // Rollback logic for failed deployment
-    //             bat "helm rollback ${RELEASE_NAME}"
-    //         }
-    //     }
-    //     always {
-    //         cleanWs() // Clean workspace after build
-    //     }
-    // }
+    post {
+        failure {
+            script {
+                // Rollback logic for failed deployment
+                bat "helm rollback ${RELEASE_NAME}"
+            }
+        }
+        always {
+            cleanWs() // Clean workspace after build
+        }
+    }
 }
