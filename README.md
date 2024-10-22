@@ -147,11 +147,15 @@ helm install voting ./voting-chart
 
 This will deploy the voting-service into the votingapp-microservice Kubernetes cluster.
 
-##Automated deployment of voting-service 
+## Automated Deployment of Voting-Service 
 * Create a Jenkinsfile in the root directory of the voting-service branch.
 * Include the neccessary stages needed in the Jenkinsfile
 * Log on to jenkins server on localhose:8080  
 * Build the Jenkinsfile located in the root directory of the voting-service branch
+
+
+![voting-service-pipeline](./images/voting-service-pipeline.png)
+
 ## Monitoring
 
 The voting-service can be monitored using Prometheus and Grafana as part of the overall monitoring stack for the voting app.
@@ -164,9 +168,6 @@ Make sure the Prometheus instance is set up to scrape the voting-service metrics
 <your-prometheus-url>/targets
 ```
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
 ```
 
 ### Explanation:
