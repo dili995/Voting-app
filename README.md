@@ -22,7 +22,7 @@
 - [Notes](#notes)
 
 ## Overview
-This repository contains a microservice-based voting application written in Go (Golang). Each branch of this repository represnts a component of the application.The application allows users to vote for either cats or dogs. It then processes these votes in real-time, and displays the results. 
+This repository contains a microservice-based voting application written in Go (Golang).This repo contains a **redis branch**, **postgres branch**, **voting-service branch**, **worker-service branch** and a **results-service branch**. Each branch of this repository represents a component of the application.The application allows users to vote for either cats or dogs. It then processes these votes in real-time, and displays the results. 
 
 The deployment of the application uses CI/CD with Jenkins, container orchestration with Kubernetes, monitoring with Prometheus and Grafana, and logging with the ELK stack (Elasticsearch, Logstash, and Kibana).
 
