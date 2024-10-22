@@ -9,6 +9,7 @@ pipeline {
         GO111MODULE = 'on'
         DOCKER_IMAGE = "lukmanadeokun31/postgres:latest"
         KUBECONFIG = credentials('kubeconfig-kind') 
+        RELEASE_NAME = "postgres"
     }
 
     stages {
@@ -47,7 +48,7 @@ pipeline {
 
         stage('Deploy with Helm') {
             steps {
-                bat "helm upgrade --install postgres ./postgres-chart -f ./postgres-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\""           
+                bat "helm upgrade --install ${RELEASE_NAME} ./postgres-chart -f ./postgres-chart/values.yaml --kubeconfig=${KUBECONFIG} --set image.repository=${DOCKER_IMAGE} --set image.tag=\"latest\""           
             }
         }
 
@@ -55,6 +56,18 @@ pipeline {
             steps {
                 bat 'kubectl get pods'
             }
+        }
+    }
+
+    post {
+        failure {
+            script {
+                // Rollback logic for failed deployment
+                bat "helm rollback ${RELEASE_NAME}"
+            }
+        }
+        always {
+            cleanWs() // Clean workspace after build
         }
     }
 }
