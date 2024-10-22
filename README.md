@@ -7,6 +7,14 @@ This `worker-service` is a key component of the Voting App Microservice, respons
 - Automatically creates a `votes` table in PostgreSQL, if it doesn't exist.
 - Responds to `POST` requests on the `/sync` endpoint to trigger the synchronization process.
 
+## Code Overview
+
+### `main.go`
+
+- **Redis Initialization**: The service initializes a connection to Redis using the provided address.
+- **PostgreSQL Initialization**: The service connects to PostgreSQL, checks if the `votingdb` exists, and creates it if it doesn't. It also creates a `votes` table if it is not present.
+- **Sync Handler**: The `/sync` handler retrieves the votes from Redis and updates the PostgreSQL `votes` table. It uses an upsert operation (`ON CONFLICT`) to ensure that votes are updated if already present.
+
 ## Prerequisites
 
 Ensure the following tools and platforms are installed and configured:
@@ -119,13 +127,7 @@ curl -X POST http://localhost:8084/sync
 
 This will fetch vote counts from Redis and update them in the PostgreSQL database.
 
-## Code Overview
 
-### `main.go`
-
-- **Redis Initialization**: The service initializes a connection to Redis using the provided address.
-- **PostgreSQL Initialization**: The service connects to PostgreSQL, checks if the `votingdb` exists, and creates it if it doesn't. It also creates a `votes` table if it is not present.
-- **Sync Handler**: The `/sync` handler retrieves the votes from Redis and updates the PostgreSQL `votes` table. It uses an upsert operation (`ON CONFLICT`) to ensure that votes are updated if already present.
 
 ## Automated Deployment of worker-service
 * Create Jenkinsfile in the root directory of the worker-service branch
