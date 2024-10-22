@@ -3,7 +3,7 @@
 ```md
 # Voting-Service Component - Voting App Microservice
 
-The `voting-service` is a core component of the Voting App microservice architecture. It handles the HTTP requests for casting votes and temporarily stores the vote counts in Redis. The votes are later synchronized with PostgreSQL by the worker-service.
+This branch contains the  `voting-service` component of the Voting App microservice architecture. The component handles the HTTP requests for casting votes and temporarily stores the vote counts in Redis. The votes are later synchronized with PostgreSQL by the worker-service.
 
 ## Table of Contents
 
