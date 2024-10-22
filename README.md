@@ -1,6 +1,6 @@
 # Worker Service - Voting App Microservice
 
-This `worker-service` is a key component of the Voting App Microservice, responsible for syncing votes from Redis (an in-memory data store) to PostgreSQL (a relational database). The votes are initially stored in Redis and periodically synced to PostgreSQL using this service. The service is deployed in a Kubernetes cluster using [KIND (Kubernetes in Docker)](https://kind.sigs.k8s.io/).
+This branch contains the  `worker-service` component of the Voting App Microservice. Thiis component is  responsible for syncing votes from Redis (an in-memory data store) to PostgreSQL (a relational database). The votes are initially stored in Redis and periodically synced to PostgreSQL using this service. The service is deployed in a Kubernetes cluster using [KIND (Kubernetes in Docker)](https://kind.sigs.k8s.io/).
 
 ## Features
 - Sync votes (for "cats" and "dogs") from Redis to PostgreSQL.
