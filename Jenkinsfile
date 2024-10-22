@@ -63,7 +63,7 @@ pipeline {
     post {
         failure {
             script {
-                // Rollback logic for failed deployment with success verification
+                // Rollback logic for failed deployment with a success verification
                 def rollbackOutput = bat(script: "helm rollback ${RELEASE_NAME}", returnStdout: true)
                 echo rollbackOutput
 
