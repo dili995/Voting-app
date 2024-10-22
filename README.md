@@ -2,7 +2,7 @@
 ```md
 # Redis Component - Voting App Microservice
 
-This repository contains the Redis component of the Voting App microservice. The Redis service is used as an in-memory data store to temporarily store votes before they are synchronized with the PostgreSQL database by the worker-service.
+This branch contains the Redis component of the Voting App microservice. The Redis service is used as an in-memory data store to temporarily store votes before they are synchronized with the PostgreSQL database by the worker-service.
 
 ## Table of Contents
 
