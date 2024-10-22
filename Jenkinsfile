@@ -63,8 +63,16 @@ pipeline {
     post {
         failure {
             script {
-                // Rollback logic for failed deployment
-                bat "helm rollback ${RELEASE_NAME}"
+                // Rollback logic for failed deployment with success verification
+                def rollbackOutput = bat(script: "helm rollback ${RELEASE_NAME}", returnStdout: true)
+                echo rollbackOutput
+
+                // Check if rollback was successful
+                if (rollbackOutput.contains("Rollback was a success") || rollbackOutput.contains("rolled back")) {
+                    echo "Rollback completed successfully."
+                } else {
+                    error("Helm rollback failed.")
+                }
             }
         }
         always {
