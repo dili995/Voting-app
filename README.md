@@ -1,6 +1,6 @@
 # PostgreSQL Component for VotingApp Microservice
 
-This repository contains the **PostgreSQL** component of the VotingApp microservice, which serves as the primary database for storing the voting data. PostgreSQL holds the votes submitted in the competition between cats and dogs, and the other services (voting-service, results-service, and worker-service) interact with this database.
+This branch contains the **PostgreSQL** component of the VotingApp microservice, which serves as the primary database for storing the voting data. PostgreSQL holds the votes submitted in the competition between cats and dogs, and the other services (voting-service, results-service, and worker-service) interact with this database.
 
 ## Overview
 
