@@ -8,17 +8,35 @@ import (
 	"log"
 	"net/http"
 
-	"os"  
+	"os"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus"   
+	"github.com/prometheus/client_golang/prometheus/promauto"  
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
 	redisClient *redis.Client
 	ctx         = context.Background()
 	templates   *template.Template
+
+	voteCount = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "vote_total",
+			Help: "Total number of votes for each option.",
+		},
+		[]string{"option"},
+	)
 )
+
+func init() {
+	// Register custom metrics
+	prometheus.MustRegister(voteCount)
+    voteCount.With(prometheus.Labels{"option": "cat"}).Add(0)
+    voteCount.With(prometheus.Labels{"option": "dog"}).Add(0)
+ }
 
 func main() {
 	redisErr := godotenv.Load()
@@ -32,7 +50,7 @@ func main() {
 	// Initialize Redis client
 	redisClient = redis.NewClient(&redis.Options{
 		Addr: REDIS_ADDR,
-	})  
+	})
 	// Test Redis connection
 	_, err := redisClient.Ping(ctx).Result()
 	if err != nil {
@@ -45,11 +63,12 @@ func main() {
 	// Serve static files (CSS)
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-
+  
 	// Route handlers
 	http.HandleFunc("/", votingPage)
 	http.HandleFunc("/vote/cat", voteCat)
 	http.HandleFunc("/vote/dog", voteDog)
+	http.Handle("/metrics", promhttp.Handler())  
 
 	// Start server
 	log.Println("Voting service is running on http://localhost:8083")
@@ -78,6 +97,7 @@ func voteCat(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Unable to record vote", http.StatusInternalServerError)
 			return
 		}
+		voteCount.With(prometheus.Labels{"option": "cat"}).Inc()
 		notifyWorkerService()
 		http.Redirect(w, r, "/results", http.StatusSeeOther)
 	} else {
@@ -92,6 +112,7 @@ func voteDog(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Unable to record vote", http.StatusInternalServerError)
 			return
 		}
+		voteCount.With(prometheus.Labels{"option": "dog"}).Inc()  
 		notifyWorkerService()
 		http.Redirect(w, r, "/results", http.StatusSeeOther)
 	} else {
@@ -134,4 +155,3 @@ func notifyWorkerService() {
 		log.Println("Error notifying worker service:", err)
 	}
 }
-  
