@@ -7,7 +7,10 @@ import (
 	"log"
 	"net/http"
 	"os"
-
+	"time"  
+    "github.com/prometheus/client_golang/prometheus"
+    "github.com/prometheus/client_golang/prometheus/promauto"
+    "github.com/prometheus/client_golang/prometheus/promhttp"
 	_ "github.com/lib/pq"
 )
 
@@ -20,7 +23,24 @@ type VoteCounts struct {
 var (
 	templates  *template.Template
 	postgresDB *sql.DB
+
+	// Prometheus metrics
+	resultsRequestCounter = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "results_requests_total",
+		Help: "Total number of requests to the results endpoint.",
+	})
+	resultsRequestDuration = prometheus.NewHistogram(prometheus.HistogramOpts{
+		Name:    "results_request_duration_seconds",
+		Help:    "Duration of requests to the results endpoint.",
+		Buckets: prometheus.DefBuckets,
+	})
 )
+
+func init() {
+	// Register metrics
+	prometheus.MustRegister(resultsRequestCounter)
+	prometheus.MustRegister(resultsRequestDuration)
+}
 
 func main() {
 	// Initialize PostgreSQL connection and create database/table
@@ -35,6 +55,8 @@ func main() {
 
 	// Route handlers
 	http.HandleFunc("/results", showResults)
+
+	http.Handle("/metrics", promhttp.Handler())
 
 	// Start server
 	log.Println("Results service is running on http://localhost:8085")
@@ -116,6 +138,10 @@ func initPostgres() {
 }
 
 func showResults(w http.ResponseWriter, r *http.Request) {
+    start := time.Now()
+	resultsRequestCounter.Inc() // Count request
+	defer resultsRequestDuration.Observe(time.Since(start).Seconds()) // Observe duration
+
     // Get the voting page URL from the environment
     votingServiceURL := os.Getenv("VOTING_SERVICE_URL")
     if votingServiceURL == "" {
