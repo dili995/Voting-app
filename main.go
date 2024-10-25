@@ -5,18 +5,35 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"net/http"  
+	"net/http"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
 	postgresDB  *sql.DB
 	redisClient *redis.Client
 	ctx         = context.Background()
+
+	syncCounter = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "vote_sync_attempts_total",
+		Help: "Total number of attempts to sync votes from Redis to PostgreSQL.",
+	})
+	syncErrorCounter = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "vote_sync_errors_total",
+		Help: "Total number of sync errors when transferring votes to PostgreSQL.",
+	})
 )
+
+func init() {
+	// Register Prometheus metrics
+	prometheus.MustRegister(syncCounter)
+	prometheus.MustRegister(syncErrorCounter)
+}
 
 func main() {
 	redisErr := godotenv.Load()
@@ -35,6 +52,9 @@ func main() {
 	initPostgres()
 
 	http.HandleFunc("/sync", syncVotesHandler)
+
+	// Expose Prometheus metrics
+	http.Handle("/metrics", promhttp.Handler())
 
 	log.Println("Worker service is running on http://localhost:8084")
 	serverErr := http.ListenAndServe(":8084", nil)
@@ -135,10 +155,12 @@ func RetrieveVotesFromRedis() (catVotes, dogVotes int, err error) {
 
 func syncVotesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
+		syncCounter.Inc() // Increment sync attempt count
 		log.Println("Received request to sync votes from Redis to PostgreSQL...")
 		catVotes, dogVotes, err := RetrieveVotesFromRedis()
 		if err != nil {
 			log.Println("Received request to sync votes from Redis to PostgreSQL...")
+			syncErrorCounter.Inc() // Increment error counter on failure
 			http.Error(w, "Unable to retrieve votes", http.StatusInternalServerError)
 			return
 		}
@@ -162,4 +184,4 @@ func syncVotesHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 	}
-}  
+}
