@@ -13,7 +13,7 @@ import (
     "github.com/prometheus/client_golang/prometheus/promhttp"
 	_ "github.com/lib/pq"
 )
-
+  
 type VoteCounts struct {
 	Id       int
 	CatVotes int
