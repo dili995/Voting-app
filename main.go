@@ -25,22 +25,22 @@ var (
 	postgresDB *sql.DB
 
 	// Prometheus metrics
-	resultsRequestCounter = prometheus.NewCounter(prometheus.CounterOpts{
+	resultsRequestCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "results_requests_total",
 		Help: "Total number of requests to the results endpoint.",
 	})
-	resultsRequestDuration = prometheus.NewHistogram(prometheus.HistogramOpts{
+	resultsRequestDuration = promauto.NewHistogram(prometheus.HistogramOpts{
 		Name:    "results_request_duration_seconds",
 		Help:    "Duration of requests to the results endpoint.",
 		Buckets: prometheus.DefBuckets,
 	})
 )
 
-func init() {
-	// Register metrics
-	prometheus.MustRegister(resultsRequestCounter)
-	prometheus.MustRegister(resultsRequestDuration)
-}
+// func init() {
+// 	// Register metrics
+// 	prometheus.MustRegister(resultsRequestCounter)
+// 	prometheus.MustRegister(resultsRequestDuration)
+// }
 
 func main() {
 	// Initialize PostgreSQL connection and create database/table
@@ -132,7 +132,7 @@ func initPostgres() {
     `)
 	if err != nil {
 		log.Fatalf("Error creating votes table: %s\n", err.Error())
-	}
+	}  
 
 	log.Println("PostgreSQL database and table initialized successfully.")
 }
