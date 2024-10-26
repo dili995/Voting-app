@@ -22,7 +22,7 @@ var (
 	ctx         = context.Background()
 	templates   *template.Template
 
-	voteCount = prometheus.NewCounterVec(
+	voteCount = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "vote_total",
 			Help: "Total number of votes for each option.",
