@@ -11,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -19,21 +20,21 @@ var (
 	redisClient *redis.Client
 	ctx         = context.Background()
 
-	syncCounter = prometheus.NewCounter(prometheus.CounterOpts{
+	syncCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "vote_sync_attempts_total",
 		Help: "Total number of attempts to sync votes from Redis to PostgreSQL.",
 	})
-	syncErrorCounter = prometheus.NewCounter(prometheus.CounterOpts{
+	syncErrorCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "vote_sync_errors_total",
 		Help: "Total number of sync errors when transferring votes to PostgreSQL.",
 	})
 )
 
-func init() {
-	// Register Prometheus metrics
-	prometheus.MustRegister(syncCounter)
-	prometheus.MustRegister(syncErrorCounter)
-}
+// func init() {
+// 	// Register Prometheus metrics
+// 	prometheus.MustRegister(syncCounter)
+// 	prometheus.MustRegister(syncErrorCounter)
+// }
 
 func main() {
 	redisErr := godotenv.Load()
@@ -52,7 +53,7 @@ func main() {
 	initPostgres()
 
 	http.HandleFunc("/sync", syncVotesHandler)
-
+  
 	// Expose Prometheus metrics
 	http.Handle("/metrics", promhttp.Handler())
 
