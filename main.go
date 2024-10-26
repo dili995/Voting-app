@@ -12,8 +12,8 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/joho/godotenv"
-	"github.com/prometheus/client_golang/prometheus"   
-	"github.com/prometheus/client_golang/prometheus/promauto"  
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -29,14 +29,19 @@ var (
 		},
 		[]string{"option"},
 	)
+
+	httpRequests = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "http_requests_total",
+		Help: "Total number of HTTP requests",
+	})
 )
 
-func init() {
-	// Register custom metrics
-	prometheus.MustRegister(voteCount)
-    voteCount.With(prometheus.Labels{"option": "cat"}).Add(0)
-    voteCount.With(prometheus.Labels{"option": "dog"}).Add(0)
- }
+// func init() {
+// 	// Register custom metrics
+// 	prometheus.MustRegister(voteCount)
+//     voteCount.With(prometheus.Labels{"option": "cat"}).Add(0)
+//     voteCount.With(prometheus.Labels{"option": "dog"}).Add(0)
+//  }
 
 func main() {
 	redisErr := godotenv.Load()
@@ -63,12 +68,12 @@ func main() {
 	// Serve static files (CSS)
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-  
+
 	// Route handlers
 	http.HandleFunc("/", votingPage)
 	http.HandleFunc("/vote/cat", voteCat)
 	http.HandleFunc("/vote/dog", voteDog)
-	http.Handle("/metrics", promhttp.Handler())  
+	http.Handle("/metrics", promhttp.Handler())
 
 	// Start server
 	log.Println("Voting service is running on http://localhost:8083")
@@ -76,6 +81,9 @@ func main() {
 }
 
 func votingPage(w http.ResponseWriter, r *http.Request) {
+	// Increment httpRequests metric
+	httpRequests.Inc()
+
 	// Get the results service URL from the environment variable
 	resultsServiceURL := os.Getenv("RESULTS_SERVICE_URL")
 
@@ -92,12 +100,15 @@ func votingPage(w http.ResponseWriter, r *http.Request) {
 
 func voteCat(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		_, err := redisClient.Incr(ctx, "cat_votes").Result()
-		if err != nil {
+		// Increment HTTP requests counter and vote counter
+		httpRequests.Inc()
+		voteCount.WithLabelValues("cat").Inc()
+
+		if _, err := redisClient.Incr(ctx, "cat_votes").Result(); err != nil {
 			http.Error(w, "Unable to record vote", http.StatusInternalServerError)
 			return
 		}
-		voteCount.With(prometheus.Labels{"option": "cat"}).Inc()
+
 		notifyWorkerService()
 		http.Redirect(w, r, "/results", http.StatusSeeOther)
 	} else {
@@ -107,12 +118,15 @@ func voteCat(w http.ResponseWriter, r *http.Request) {
 
 func voteDog(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		_, err := redisClient.Incr(ctx, "dog_votes").Result()
-		if err != nil {
+		// Increment HTTP requests counter and vote counter
+		httpRequests.Inc()
+		voteCount.WithLabelValues("dog").Inc()
+
+		if _, err := redisClient.Incr(ctx, "dog_votes").Result(); err != nil {
 			http.Error(w, "Unable to record vote", http.StatusInternalServerError)
 			return
 		}
-		voteCount.With(prometheus.Labels{"option": "dog"}).Inc()  
+
 		notifyWorkerService()
 		http.Redirect(w, r, "/results", http.StatusSeeOther)
 	} else {
