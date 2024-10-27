@@ -29,11 +29,6 @@ var (
 		},
 		[]string{"option"},
 	)
-
-	httpRequests = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "http_requests_total",
-		Help: "Total number of HTTP requests",
-	})
 )
 
 // func init() {
@@ -81,9 +76,6 @@ func main() {
 }
 
 func votingPage(w http.ResponseWriter, r *http.Request) {
-	// Increment httpRequests metric
-	httpRequests.Inc()
-
 	// Get the results service URL from the environment variable
 	resultsServiceURL := os.Getenv("RESULTS_SERVICE_URL")
 
@@ -100,15 +92,12 @@ func votingPage(w http.ResponseWriter, r *http.Request) {
 
 func voteCat(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		// Increment HTTP requests counter and vote counter
-		httpRequests.Inc()
-		voteCount.WithLabelValues("cat").Inc()
-
-		if _, err := redisClient.Incr(ctx, "cat_votes").Result(); err != nil {
+		_, err := redisClient.Incr(ctx, "cat_votes").Result()
+		if err != nil {
 			http.Error(w, "Unable to record vote", http.StatusInternalServerError)
 			return
 		}
-
+		voteCount.With(prometheus.Labels{"option": "cat"}).Inc()
 		notifyWorkerService()
 		http.Redirect(w, r, "/results", http.StatusSeeOther)
 	} else {
@@ -118,15 +107,12 @@ func voteCat(w http.ResponseWriter, r *http.Request) {
 
 func voteDog(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		// Increment HTTP requests counter and vote counter
-		httpRequests.Inc()
-		voteCount.WithLabelValues("dog").Inc()
-
-		if _, err := redisClient.Incr(ctx, "dog_votes").Result(); err != nil {
+		_, err := redisClient.Incr(ctx, "dog_votes").Result()
+		if err != nil {
 			http.Error(w, "Unable to record vote", http.StatusInternalServerError)
 			return
 		}
-
+		voteCount.With(prometheus.Labels{"option": "dog"}).Inc()
 		notifyWorkerService()
 		http.Redirect(w, r, "/results", http.StatusSeeOther)
 	} else {
