@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: voting
-        #image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-        image: "lukmanadeokun31/voting-service:latest"
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        #image: "lukmanadeokun31/voting-service:latest"
         ports:
           - containerPort: 8083
         env:

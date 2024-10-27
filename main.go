@@ -12,9 +12,9 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/joho/godotenv"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	//"github.com/prometheus/client_golang/prometheus"
+	//"github.com/prometheus/client_golang/prometheus/promauto"
+	//"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
@@ -22,13 +22,13 @@ var (
 	ctx         = context.Background()
 	templates   *template.Template
 
-	voteCount = promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "vote_total",
-			Help: "Total number of votes for each option.",
-		},
-		[]string{"option"},
-	)
+	// voteCount = promauto.NewCounterVec(
+	// 	prometheus.CounterOpts{
+	// 		Name: "vote_total",
+	// 		Help: "Total number of votes for each option.",
+	// 	},
+	// 	[]string{"option"},
+	// )
 )
 
 // func init() {
@@ -68,7 +68,7 @@ func main() {
 	http.HandleFunc("/", votingPage)
 	http.HandleFunc("/vote/cat", voteCat)
 	http.HandleFunc("/vote/dog", voteDog)
-	http.Handle("/metrics", promhttp.Handler())
+	//http.Handle("/metrics", promhttp.Handler())
 
 	// Start server
 	log.Println("Voting service is running on http://localhost:8083")
@@ -97,7 +97,7 @@ func voteCat(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Unable to record vote", http.StatusInternalServerError)
 			return
 		}
-		voteCount.With(prometheus.Labels{"option": "cat"}).Inc()
+		//voteCount.With(prometheus.Labels{"option": "cat"}).Inc()
 		notifyWorkerService()
 		http.Redirect(w, r, "/results", http.StatusSeeOther)
 	} else {
@@ -112,7 +112,7 @@ func voteDog(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Unable to record vote", http.StatusInternalServerError)
 			return
 		}
-		voteCount.With(prometheus.Labels{"option": "dog"}).Inc()
+		//voteCount.With(prometheus.Labels{"option": "dog"}).Inc()
 		notifyWorkerService()
 		http.Redirect(w, r, "/results", http.StatusSeeOther)
 	} else {
