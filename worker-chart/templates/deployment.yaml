@@ -15,5 +15,5 @@ spec:
       containers:
       - name: worker
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-        # ports:
-        # - containerPort: 8084
+        ports:
+        - containerPort: 8084
