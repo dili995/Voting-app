@@ -7,24 +7,22 @@
 - [Setup](#setup)
   - [Environment Configuration](#environment-configuration)
   - [Architecture and Dataflow](#architecture-and-dataflow)
-  - [Initialize Redis](#initialize-redis)
-  - [Initialize PostgreSQL Database](#initialize-postgresql-database)
+  - [Helm Setup and Installation](#helm-setup-and-installation)
+  - [Monitoring with Prometheus and Grafana](#monitoring-with-prometheus-and-grafana)
 - [Service Details](#service-details)
-  - [Voting Service](#voting-service)
-  - [Worker Service](#worker-service)
-  - [Results Service](#results-service)
 - [Running the Services](#running-the-services)
-- [Containerization and Docker Setup ](#containerization-and-docker-setup)
-
+- [Containerization and Docker Setup](#containerization-and-docker-setup)
+- [Automated Orchestration with Jenkins](#automated-orchestration-with-jenkins)
 - [Design Choices](#design-choices)
 - [Repository Structure](#repository-structure)
 - [Troubleshooting](#troubleshooting)
 - [Notes](#notes)
 
 ## Overview
-This repository contains a microservice-based voting application written in Go (Golang).This repo contains a **redis branch**, **postgres branch**, **voting-service branch**, **worker-service branch** and a **results-service branch**. Each branch of this repository represents a component of the application.The application allows users to vote for either cats or dogs. It then processes these votes in real-time, and displays the results. 
+This repository contains a microservice-based voting application written in Go. It is a multi-branch repo containing 
+a **redis branch**, **postgres branch**, **voting-service branch**, **worker-service branch** and a **results-service branch**. 
 
-The deployment of the application uses CI/CD with Jenkins, container orchestration with Kubernetes, monitoring with Prometheus and Grafana, and logging with the ELK stack (Elasticsearch, Logstash, and Kibana).
+Each branch of this repository represents a component of the application.The application allows users to vote for either cats or dogs, processes these votes in real-time, and displays the results. The setup uses Jenkins for CI/CD, Kubernetes for orchestration, Helm for deployment management, and monitoring via Prometheus and Grafana, with logging provided by the ELK stack.
 
 ### Microservices Overview
 - **Voting Service:** Manages user voting.
@@ -46,42 +44,87 @@ Ensure the following dependencies are installed:
 - **Docker** for containerization
 - **Jenkins** for CI/CD pipeline automation
 - **Kubernetes** for container orchestration
-- **DockerDesktop** for local containerisation
-- **Kubernetes in Docker(KIND)** for kubernetes clusters management
-
-
+- **Docker Desktop** for local containerization
+- **Kubernetes in Docker (KIND)** for managing Kubernetes clusters
+- **Helm** for Kubernetes deployment management
 - **Prometheus & Grafana** for monitoring and alerting
 - **ELK Stack** (Elasticsearch, Logstash, Kibana) for logging
 
 ## Setup
 
 ### Environment Configuration
-Each service requires environment variables, which are stored in `.env` files. Example `.env` files are provided in the respective service directories.
-
-#### Sample `.env` Files
-- `voting-service/.env`
-- `worker-service/.env`
-- `results-service/.env`
+Each service requires environment variables stored in `.env` files. Example `.env` files are provided in the respective service directories.
 
 ### Architecture and Dataflow of the Application
 ![Microservice Architecture](./images/microservice.png)
 
-1. The user votes for either a cat or a dog.
-2. The vote is stored in Redis, an in-memory data store.
-3. A background worker service reads from Redis and updates the vote count in PostgreSQL.
-4. The results service reads from PostgreSQL and displays the voting results via a web interface.
+1. User votes for either a cat or a dog.
+2. The vote is stored in Redis.
+3. A background worker syncs votes from Redis to PostgreSQL.
+4. The results service reads from PostgreSQL to display voting results.
 5. **Monitoring:** Prometheus scrapes metrics from the services, and Grafana provides visualization.
 6. **Logging:** ELK stack captures logs from the services.
 
-### Initialize Redis
-- Ensure Redis is installed and running.
-- Redis stores vote counts before they are synced to PostgreSQL.
+### Helm Setup and Installation
+Helm is used to deploy the application to the Kubernetes cluster. Ensure Helm is installed, then follow these steps:
 
-### Initialize PostgreSQL Database
-- Ensure PostgreSQL is installed and running.
-- The services will automatically create the necessary tables in the PostgreSQL database if they don't exist.
+1. **Initialize Helm:**  
+   ```bash
+   helm init
+   ```
+
+2. **Create a Helm Chart for Each Service:** Each branch/service (voting-service, worker-service, results-service, Redis, PostgreSQL) should have a Helm chart in the `charts/` directory.
+
+3. **Deploy Services using Helm:**  
+   ```bash
+   git checkout redis
+   helm install redis ./redis-chart
+
+   git checkout postgres
+   helm install postgres ./postgres
+
+   git checkout voting-service
+   helm install voting ./voting-chart
+
+   git checkout worker-service
+   helm install worker ./worker-chart
+
+   git checkout results-service
+   helm install results ./results-chart
+   ```
+
+4. **Verify Installation:**
+   ```bash
+   kubectl get all
+   ```
+
+### Monitoring with Prometheus and Grafana
+Prometheus and Grafana are used for monitoring and visualization. 
+
+1. **Install Prometheus and Grafana:**
+   * Download and deploy the kube-prometheus-stack Helm chart.
+   ```bash
+     helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+     helm repo update
+     helm install prometheus prometheus-community/kube-prometheus-stack
+   ```
+
+2. **Configure Service Monitoring:**
+   - Set up a `ServiceMonitor` resource for each service to allow Prometheus to scrape metrics. This can be added in the Helm chart for each service.
+
+3. **Access Grafana Dashboard:**
+   - Retrieve the Grafana password:
+     ```bash
+     kubectl get secret --namespace default grafana -o jsonpath="{.data.admin-password}" | base64 --decode
+     ```
+   - Port forward Grafana to access it locally:
+     ```bash
+     kubectl port-forward service/grafana 3000:3000
+     ```
+   - Open Grafana at `http://localhost:3000` and log in with the retrieved password.
 
 ## Service Details
+Each service is explained below with its main functionality, port, and routes.
 
 ### Voting Service
 - **Port:** 8083
@@ -89,32 +132,18 @@ Each service requires environment variables, which are stored in `.env` files. E
   - `GET /`: Displays the voting page.
   - `POST /vote/cat`: Increments the cat vote.
   - `POST /vote/dog`: Increments the dog vote.
-  
-#### Main Functions:
-- Connects to Redis for vote storage.
-- Provides endpoints for user voting.
-- Notifies the worker service after each vote is cast.
 
 ### Worker Service
 - **Port:** 8084
 - **Route:**
-  - `POST /sync`: Receives vote counts from Redis and syncs them to PostgreSQL.
-
-#### Main Functions:
-- Connects to Redis and PostgreSQL.
-- Synchronizes vote counts from Redis to PostgreSQL.
+  - `POST /sync`: Syncs vote counts from Redis to PostgreSQL.
 
 ### Results Service
 - **Port:** 8085
 - **Route:**
   - `GET /results`: Displays current vote counts from PostgreSQL.
 
-#### Main Functions:
-- Connects to PostgreSQL to retrieve vote counts.
-- Renders the results page.
-
 ## Running the Services
-
 1. **Start Redis:**
    ```bash
    redis-server
@@ -132,90 +161,25 @@ Each service requires environment variables, which are stored in `.env` files. E
    - Worker Service: `http://localhost:8084`
    - Results Service: `http://localhost:8085`
 
-
-  ### voting-service
+### voting-service
 
 ![voting-service](./images/voting-service.png)
 
 ### results-service
 ![results-service](./images/results-service.png)
 
-
-
 ## Containerization and Docker Setup
-
-To containerize the application, Dockerfiles are used for each service, and a `docker-compose.yml` file can manage the multi-container setup.
+Dockerfiles are used for each service, with a `docker-compose.yml` file for multi-container setup.
 
 1. **Docker Network:**
-   Create a custom network:
    ```bash
    docker network create my-voting-app-network
    ```
 
-2. **Start Services:**
-   Use Docker Compose to build and run the containers:
+2. **Start Services with Docker Compose:**
    ```bash
    docker-compose up -d
    ```
-
-  
-
-3. **Handling PostgreSQL Delays:**
-   To prevent connection errors during startup, delay the worker and results services:
-   ```yaml
-   worker-service:
-     entrypoint: sh -c "sleep 10 && ./worker-service"
-   results-service:
-     entrypoint: sh -c "sleep 10 && ./results-service"
-   ```
-
-
-### Microservice in Docker Desktop after running the cmd  `docker-compose up -d` in the terminal
-![Docker-Compose results](./images/docker-desktop.png)
-
-## Container Orchestration using Kubernetes
-With each service dockerised, the next step is to load into a kubernetes cluster.
-Kubernetes in Docker(KIND) was used to achieve this
-* Kind was installed
-* Kind cluster was created with a config file(for networking) that exposes Nodeport for the voting-service and resesults-service using the command below
-
-``` bash 
-kind create cluster --name myvotingapp-microservice --config kind-config.yaml  
-```
- 
-* Load the 5 images into the KIND cluster using the command below
-``` bash
-  * kind load docker-image redis:latest --name    votingapp-microservice
-
-  * kind load docker-image voting-service:latest --name votingapp-microservice
-
-  * kind load docker-image postgres:latest --name votingapp-microservice
-
-  * kind load docker-image results-service:latest --name votingapp-microservice
-
-  * kind load docker-image worker-service:latest --name votingapp-microservice
-```
-
-* Deployed the redis pod,redis service, voting-app pod,voting-app service, postgres pod, postgres service,results pod, results service, worker pod, worker service 
-
-``` bash
-* kubectl create -f redis-pod.yaml
-* kubectl create -f redis-service.yaml
-
-* kubectl create -f voting-app-pod.yaml
-* kubectl create -f voting-app-service.yaml
-
-* kubectl create -f postgres-pod.yaml
-* kubectl create -f postgres-service.yaml
-
-* kubectl create -f results-app-pod.yaml
-* kubectl create -f results-app-service.yaml
-
-* kubectl create -f worker-app-pod.yaml
-* kubectl create -f worker-app-service.yaml
-```
-* Ran the url below in  a browser 
-http://127.0.0.1:30004/
 
 ## Automated Container Orchestration in KIND using Jenkins
 
@@ -241,32 +205,56 @@ First , the KIND cluster automatically generates certificates and keys for authe
 * Configure pipelines for each service (voting-service, worker-service, results-service, Redis, PostgreSQL) by creating a jenkinsfile in the root directory of each branch.
 * Automate deployment for pipeline using kubectl and Helm.
 
+### redis pipeline
+![redis-pipeline.png](./images/redis-pipeline.png)
+
+### postgres pipeline
+![postgres-pipeline.png](./images/postgres-pipeline.png)
+
+### voting-service pipeline
+![voting-service-pipeline.png](./images/voting-service-pipeline.png)
+
+### worker-service pipeline
+![worker-service-pipeline.png](./images/worker-service-pipeline.png)
+
+### results-service pipeline
+![results-service-pipeline.png](./images/results-service-pipeline.png)
+
+###  votingapp microservice
 ![votingapp-microservice.png](./images/votingapp-microservice.png)
 
 
+### Cat metrics
+![cat-metrics-prometheus.png](./images/cat-metrics-prometheus.png)
+
+### Dog metrics
+![dog-metrics-prometheus.png](./images/dog-metrics-prometheus.png)
+
+### Cat metrics visualisation
+![cat-metrics-prometheus.png](./images/cat-result-visualisation.png)
+
+### Dog metrics visualisation
+![dog-metrics-prometheus.png](./images/dog-result-visualisation.png)
+
+
 ## Design Choices
-- **Microservice Architecture:** The application is divided into loosely coupled services (voting, worker,results, redis and postgres) for scalability and independent deployment.
-- **Autoscaling:** Kubernetes Horizontal Pod Autoscaler ensures efficient handling of increased traffic based on CPU usage.
+- **Microservice Architecture:** Each service is independently deployable.
+- **Autoscaling:** Kubernetes Horizontal Pod Autoscaler (HPA) ensures efficient handling of increased traffic.
 - **Monitoring & Logging:** Prometheus, Grafana, and the ELK stack provide a comprehensive solution for monitoring and logging.
 
-
-
-
 ## Repository Structure
-
 - `static/`: Contains static assets such as CSS and images.
 - `images/`: Holds images like the microservice architecture diagram.
 - `voting-service/`: Handles user input and vote submission.
 - `worker-service/`: Processes and syncs votes from Redis to PostgreSQL.
 - `results-service/`: Retrieves and displays vote counts from PostgreSQL.
 - `go.mod`: Defines the Go module and its dependencies.
-- `docker-compose.yml`:  This file  is one that allows one to specify the services, networks e.t.c. that the voting application requires in a single file, streamlining the process of orchestrating multiple Docker containers.
-## Troubleshooting
+- `docker-compose.yml`: Streamlines container orchestration.
 
+## Troubleshooting
 - **Database Connection Errors:** Verify PostgreSQL is running and the credentials in `.env` are correct.
 - **Redis Connection Issues:** Ensure Redis is running and accessible at the specified address.
 
 ## Notes
 - Ensure all environment variables are correctly set before running the services.
 - Adjust configuration (e.g., Redis and PostgreSQL addresses) in `.env` files as needed.
-
