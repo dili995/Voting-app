@@ -1,4 +1,4 @@
-# Golang Microservice Voting Application with CI/CD, Kubernetes, Monitoring, and Logging
+# Golang Microservice Voting Application with CI/CD, Kubernetes and Monitoring
 
 ## Table of Contents
 - [Overview](#overview)
@@ -22,7 +22,7 @@
 This repository contains a microservice-based voting application written in Go. It is a multi-branch repo containing 
 a **redis branch**, **postgres branch**, **voting-service branch**, **worker-service branch** and a **results-service branch**. 
 
-Each branch of this repository represents a component of the application.The application allows users to vote for either cats or dogs, processes these votes in real-time, and displays the results. The setup uses Jenkins for CI/CD, Kubernetes for orchestration, Helm for deployment management, and monitoring via Prometheus and Grafana, with logging provided by the ELK stack.
+Each branch of this repository represents a component of the application.The application allows users to vote for either cats or dogs, processes these votes in real-time, and displays the results. The setup uses Jenkins for CI/CD, Kubernetes for orchestration, Helm for deployment management, and monitoring via Prometheus and Grafana.
 
 ### Microservices Overview
 - **Voting Service:** Manages user voting.
@@ -33,7 +33,6 @@ Each branch of this repository represents a component of the application.The app
 - **CI/CD:** Automated with Jenkins.
 - **Kubernetes Deployment:** Orchestration of services.
 - **Monitoring:** Prometheus for metrics scraping and Grafana for visualization.
-- **Logging:** ELK stack for log management and analysis.
 - **Autoscaling:** Handles increased traffic with Kubernetes HPA (Horizontal Pod Autoscaler).
 
 ## Prerequisites
@@ -48,7 +47,6 @@ Ensure the following dependencies are installed:
 - **Kubernetes in Docker (KIND)** for managing Kubernetes clusters
 - **Helm** for Kubernetes deployment management
 - **Prometheus & Grafana** for monitoring and alerting
-- **ELK Stack** (Elasticsearch, Logstash, Kibana) for logging
 
 ## Setup
 
@@ -63,7 +61,6 @@ Each service requires environment variables stored in `.env` files. Example `.en
 3. A background worker syncs votes from Redis to PostgreSQL.
 4. The results service reads from PostgreSQL to display voting results.
 5. **Monitoring:** Prometheus scrapes metrics from the services, and Grafana provides visualization.
-6. **Logging:** ELK stack captures logs from the services.
 
 ### Helm Setup and Installation
 Helm is used to deploy the application to the Kubernetes cluster. Ensure Helm is installed, then follow these steps:
@@ -240,7 +237,7 @@ First , the KIND cluster automatically generates certificates and keys for authe
 ## Design Choices
 - **Microservice Architecture:** Each service is independently deployable.
 - **Autoscaling:** Kubernetes Horizontal Pod Autoscaler (HPA) ensures efficient handling of increased traffic.
-- **Monitoring & Logging:** Prometheus, Grafana, and the ELK stack provide a comprehensive solution for monitoring and logging.
+- **Monitoring:** Prometheus, Grafana, provide an effective solution for monitoring.
 
 ## Repository Structure
 - `static/`: Contains static assets such as CSS and images.
