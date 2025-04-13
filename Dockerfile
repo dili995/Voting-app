@@ -39,7 +39,7 @@ COPY static /voting-service/static
 COPY templates /voting-service/templates
 
 # Copy .env file (ensure it's configured with the correct Redis host in production)
-# COPY .env /voting-service/.env
+COPY .env /voting-service/.env
 
 # Expose the port the app runs on
 EXPOSE 8083
