@@ -39,7 +39,7 @@ COPY static /results-service/static
 COPY templates /results-service/templates
 
 # Copy .env file (ensure it's configured with the correct Redis host in production)
-# COPY .env /results-service/.env
+COPY .env /results-service/.env
 
 # Expose the port the app runs on
 EXPOSE 8085
